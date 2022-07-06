@@ -4,6 +4,7 @@ import httpStatus from "http-status-codes";
 import http from "http";
 import qs from 'query-string'
 import {CustomError, sendHTTPError} from "../utils/http-response";
+import axios from "axios";
 
 export function session(req: Request, res: Response, next: NextFunction) {
     try {
@@ -16,6 +17,22 @@ export function session(req: Request, res: Response, next: NextFunction) {
         Context.set(req, sess);
         next();
     } catch (err) {
+        sendHTTPError(res, err);
+    }
+}
+
+export async function sessionHTTP(req: Request, res: Response, next: NextFunction) {
+    const at: string = <string>req.query.access_token;
+    try {
+        const url = `https://cie-unlam-server-users.herokuapp.com/api/1/auth/token/info?access_token=${at}`;
+        const {data, status} = await axios.get<Session>(url);
+        Context.set(req, data);
+        next();
+    } catch(err) {
+        if (axios.isAxiosError(err) && err.response) {
+            let local = <CustomError> err.response.data;
+            err = new CustomError(local.status, local.message);
+        }
         sendHTTPError(res, err);
     }
 }
