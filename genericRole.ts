@@ -2,8 +2,10 @@ import {NextFunction, Request, Response} from "express";
 import httpStatus from "http-status-codes";
 import Context from "./session";
 import {CustomError} from '../utils/http-response'
+import {Role} from "../utils/session";
 
 export function getVerifiedRoleFunc(roles: number[]) {
+    roles.push(Role.ROOT);
     return (req: Request, res: Response, next: NextFunction) => {
         try {
             const session = Context.get(req).session;
