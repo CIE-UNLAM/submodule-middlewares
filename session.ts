@@ -24,7 +24,7 @@ export function session(req: Request, res: Response, next: NextFunction) {
 export async function sessionHTTP(req: Request, res: Response, next: NextFunction) {
     const at: string = <string>req.query.access_token;
     try {
-        const url = `https://cie-unlam-server-users.herokuapp.com/api/1/auth/token/info?access_token=${at}`;
+        const url = `${process.env.USERS_SERVICE}/api/1/auth/token/info?access_token=${at}`;
         const {data, status} = await axios.get<Session>(url);
         Context.set(req, data);
         next();
