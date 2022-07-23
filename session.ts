@@ -22,9 +22,16 @@ export function session(req: Request, res: Response, next: NextFunction) {
 }
 
 export async function sessionHTTP(req: Request, res: Response, next: NextFunction) {
-    const at: string = <string>req.query.access_token;
+    let token : string;
+    const bearerHeader: string = <string>req.headers.authorization;
+    if (bearerHeader && bearerHeader.includes("Bearer")) {
+        const bearer = bearerHeader.split(' ');
+        token = bearer[1];
+    } else {
+        token = <string>req.query.access_token;
+    }
     try {
-        const url = `${process.env.USERS_SERVICE}/api/1/auth/token/info?access_token=${at}`;
+        const url = `${process.env.USERS_SERVICE}/api/1/auth/token/info?access_token=${token}`;
         const {data, status} = await axios.get<Session>(url);
         Context.set(req, data);
         next();
