@@ -51,6 +51,21 @@ export function authenticateWS(req: http.IncomingMessage): Session {
     return sess;
 }
 
+export async function authenticateWSHTTP(req: http.IncomingMessage): Promise<Session> {
+    let url = req.url;
+    if (!url) {
+        throw new CustomError(httpStatus.INTERNAL_SERVER_ERROR, 'internal web socket server error');
+    }
+    let params =  <{access_token: string}>qs.parse(url.split('?')[1]);
+    const at = params.access_token;
+    let urlHTTP = `${process.env.USERS_SERVICE}/api/1/auth/token/info?access_token=${at}`;
+    const {data, status} = await axios.get<Session>(urlHTTP);
+    if (data == null || status !== httpStatus.OK) {
+        throw new CustomError(httpStatus.UNAUTHORIZED, 'invalid access token');
+    }
+    return data;
+}
+
 export default class Context {
     private static bindings = new WeakMap<Request, Context>();
     public session: Session;
