@@ -23,10 +23,9 @@ export function session(req: Request, res: Response, next: NextFunction) {
 
 export async function sessionHTTP(req: Request, res: Response, next: NextFunction) {
     let token : string;
-    const bearerHeader: string = <string>req.headers.authorization;
-    if (bearerHeader && bearerHeader.includes("Bearer")) {
-        const bearer = bearerHeader.split(' ');
-        token = bearer[1];
+    const authHeader: string = <string>req.headers.authorization;
+    if (authHeader && authHeader.startsWith("Bearer ")){
+        token = authHeader.substring(7, authHeader.length);
     } else {
         token = <string>req.query.access_token;
     }
