@@ -7,9 +7,16 @@ import {CustomError, sendHTTPError} from "../utils/http-response";
 import axios from "axios";
 
 export function session(req: Request, res: Response, next: NextFunction) {
+    let token : string;
+    const tokenStartingPosition = 7;
+    const authHeader: string = <string>req.headers.authorization;
     try {
-        const at: string = <string>req.query.access_token;
-        const sess = SessionManager.getSession(at);
+        if (authHeader && authHeader.startsWith("Bearer ")){
+            token = authHeader.substring(tokenStartingPosition, authHeader.length);
+        } else {
+            token = <string>req.query.access_token;
+        }
+        const sess = SessionManager.getSession(token);
         if (sess == null) {
             new CustomError(httpStatus.UNAUTHORIZED, 'invalid token').send(res);
             return;
