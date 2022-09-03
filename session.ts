@@ -6,10 +6,17 @@ import qs from 'query-string'
 import {CustomError, sendHTTPError} from "../utils/http-response";
 import axios from "axios";
 
-export function session(req: Request, res: Response, next: NextFunction) {
+export async function session(req: Request, res: Response, next: NextFunction) {
+    let token: string;
+    const tokenStartingPosition = 7;
+    const authHeader: string = <string>req.headers.authorization;
     try {
-        const at: string = <string>req.query.access_token;
-        const sess = SessionManager.getSession(at);
+        if (authHeader && authHeader.startsWith("Bearer ")) {
+            token = authHeader.substring(tokenStartingPosition, authHeader.length);
+        } else {
+            token = <string>req.query.access_token;
+        }
+        const sess = await SessionManager.getSession(token);
         if (sess == null) {
             new CustomError(httpStatus.UNAUTHORIZED, 'invalid token').send(res);
             return;
@@ -44,14 +51,14 @@ export async function sessionHTTP(req: Request, res: Response, next: NextFunctio
     }
 }
 
-export function authenticateWS(req: http.IncomingMessage): Session {
+export async function authenticateWS(req: http.IncomingMessage): Promise<Session> {
     let url = req.url;
     if (!url) {
         throw new CustomError(httpStatus.INTERNAL_SERVER_ERROR, 'internal web socket server error');
     }
-    let params =  <{access_token: string}>qs.parse(url.split('?')[1]);
+    let params = <{ access_token: string }>qs.parse(url.split('?')[1]);
     const at = params.access_token;
-    let sess = SessionManager.getSession(at);
+    let sess = await SessionManager.getSession(at);
     if (sess == null) {
         throw new CustomError(httpStatus.UNAUTHORIZED, 'invalid access token');
     }
