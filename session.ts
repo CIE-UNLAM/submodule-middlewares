@@ -18,7 +18,7 @@ export function session(req: Request, res: Response, next: NextFunction) {
         }
         const sess = SessionManager.getSession(token);
         if (sess == null) {
-            new CustomError(httpStatus.UNAUTHORIZED, 'invalid token').send(res);
+            new CustomError(httpStatus.UNAUTHORIZED, 'Lo siento. Necesita iniciar sesión').send(res);
             return;
         }
         Context.set(req, sess);
@@ -54,13 +54,13 @@ export async function sessionHTTP(req: Request, res: Response, next: NextFunctio
 export function authenticateWS(req: http.IncomingMessage): Session {
     let url = req.url;
     if (!url) {
-        throw new CustomError(httpStatus.INTERNAL_SERVER_ERROR, 'internal web socket server error');
+        throw new CustomError(httpStatus.INTERNAL_SERVER_ERROR, 'Error interno del servidor web socket');
     }
     let params =  <{access_token: string}>qs.parse(url.split('?')[1]);
     const at = params.access_token;
     let sess = SessionManager.getSession(at);
     if (sess == null) {
-        throw new CustomError(httpStatus.UNAUTHORIZED, 'invalid access token');
+        throw new CustomError(httpStatus.UNAUTHORIZED, 'Lo siento. Necesita iniciar sesión');
     }
     return sess;
 }
@@ -68,14 +68,14 @@ export function authenticateWS(req: http.IncomingMessage): Session {
 export async function authenticateWSHTTP(req: http.IncomingMessage): Promise<Session> {
     let url = req.url;
     if (!url) {
-        throw new CustomError(httpStatus.INTERNAL_SERVER_ERROR, 'internal web socket server error');
+        throw new CustomError(httpStatus.INTERNAL_SERVER_ERROR, 'Error interno del servidor web socket');
     }
     let params =  <{access_token: string}>qs.parse(url.split('?')[1]);
     const at = params.access_token;
     let urlHTTP = `${process.env.USERS_SERVICE}/api/1/auth/token/info?access_token=${at}`;
     const {data, status} = await axios.get<Session>(urlHTTP);
     if (data == null || status !== httpStatus.OK) {
-        throw new CustomError(httpStatus.UNAUTHORIZED, 'invalid access token');
+        throw new CustomError(httpStatus.UNAUTHORIZED, 'Lo siento. Necesita iniciar sesión');
     }
     return data;
 }
@@ -99,7 +99,7 @@ export default class Context {
     static get(req: Request) : Context {
         let ret = Context.bindings.get(req);
         if (ret == null) {
-            throw new CustomError(httpStatus.INTERNAL_SERVER_ERROR, 'cannot get context for that request');
+            throw new CustomError(httpStatus.INTERNAL_SERVER_ERROR, 'Lo siento, no se puede obtener contexto de la solicitud');
         }
         return ret;
     }
