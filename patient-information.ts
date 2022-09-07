@@ -7,7 +7,7 @@ import Context from "./session";
 export function onlyViewMyInformation(req: Request, res: Response, next: NextFunction) {
     const sess = Context.get(req).session;
     if (sess.role.some(e => e == Role.PG) && req.params.username !== sess.username) {
-        new CustomError(httpStatus.FORBIDDEN, 'you can only see your user information').send(res);
+        new CustomError(httpStatus.FORBIDDEN, 'Lo siento, sólo puedes ver tu información').send(res);
         return;
     }
     next();
