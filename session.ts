@@ -38,7 +38,7 @@ export async function sessionHTTP(req: Request, res: Response, next: NextFunctio
         token = <string>req.query.access_token;
     }
     try {
-        const url = `${process.env.USERS_SERVICE}/api/1/auth/token/info?access_token=${token}`;
+        const url = `${process.env.USERS_SERVICE}auth/token/info?access_token=${token}`;
         const {data, status} = await axios.get<Session>(url);
         Context.set(req, data);
         next();
@@ -72,7 +72,7 @@ export async function authenticateWSHTTP(req: http.IncomingMessage): Promise<Ses
     }
     let params =  <{access_token: string}>qs.parse(url.split('?')[1]);
     const at = params.access_token;
-    let urlHTTP = `${process.env.USERS_SERVICE}/api/1/auth/token/info?access_token=${at}`;
+    let urlHTTP = `${process.env.USERS_SERVICE}auth/token/info?access_token=${at}`;
     const {data, status} = await axios.get<Session>(urlHTTP);
     if (data == null || status !== httpStatus.OK) {
         throw new CustomError(httpStatus.UNAUTHORIZED, 'Lo siento. Necesita iniciar sesión');
